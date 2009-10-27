@@ -1,0 +1,20 @@
+version = 'v3.5'
+compile_target = 'Debug'
+project = "MVCommand"
+framework_dir = File.join(ENV['windir'].dup, 'Microsoft.NET', 'Framework', version)
+msbuild = File.join(framework_dir, 'msbuild.exe')
+
+task :default => :build
+
+desc "Build the project, run the tests, and generate the appropriate config files"
+task :build => [:compile] 
+
+desc "Compile the solution"
+task :compile do
+	sh "#{msbuild} #{project}.sln /property:Configuration=#{compile_target}"
+end
+
+desc "Set compilation to release mode"
+task :release do
+	compile_target = 'Release'
+end
