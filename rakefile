@@ -3,11 +3,12 @@ compile_target = 'Debug'
 project = "MVCommand"
 framework_dir = File.join(ENV['windir'].dup, 'Microsoft.NET', 'Framework', version)
 msbuild = File.join(framework_dir, 'msbuild.exe')
+bin_path = "MVCommand/bin"
 
 task :default => :build
 
-desc "Build the project, run the tests, and generate the appropriate config files"
-task :build => [:compile] 
+desc "Build the project and generate the appropriate output files"
+task :build => [:compile, :merge] 
 
 desc "Compile the solution"
 task :compile do
@@ -17,4 +18,22 @@ end
 desc "Set compilation to release mode"
 task :release do
 	compile_target = 'Release'
+end
+
+task :merge do
+	dlls = ["#{bin_path}/#{compile_target}/MVCommand.dll", "#{bin_path}/#{compile_target}/Microsoft.Practices.ServiceLocation.dll"]
+	merge_dlls generate_dll_arguments dlls
+end
+
+def generate_dll_arguments dlls
+	dll_args = ''
+	dlls.each do |dll|
+		dll_args.length == 0 ? dll_args += dll : dll_args += " " + dll
+	end
+	dll_args
+end
+
+def merge_dlls vals
+	Dir.mkdir("build") unless File.directory?("build")
+	sh "Tools/ilmerge /out:build/MVCommand.dll #{vals}"
 end
