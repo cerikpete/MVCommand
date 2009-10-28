@@ -1,14 +1,15 @@
-version = 'v3.5'
-compile_target = 'Debug'
+version = "v3.5"
+compile_target = "Debug"
 project = "MVCommand"
-framework_dir = File.join(ENV['windir'].dup, 'Microsoft.NET', 'Framework', version)
-msbuild = File.join(framework_dir, 'msbuild.exe')
+framework_dir = File.join(ENV['windir'].dup, "Microsoft.NET", "Framework", version)
+msbuild = File.join(framework_dir, "msbuild.exe")
 bin_path = "MVCommand/bin"
+test_runner = "tools/nunit/nunit-console.exe"
 
 task :default => :build
 
 desc "Build the project and generate the appropriate output files"
-task :build => [:compile, :merge] 
+task :build => [:compile, :test, :merge] 
 
 desc "Compile the solution"
 task :compile do
@@ -20,9 +21,16 @@ task :release do
 	compile_target = 'Release'
 end
 
+desc "Merge all assemblies into one master assembly"
 task :merge do
 	dlls = ["#{bin_path}/#{compile_target}/MVCommand.dll", "#{bin_path}/#{compile_target}/Microsoft.Practices.ServiceLocation.dll"]
 	merge_dlls generate_dll_arguments dlls
+end
+
+desc "Run all application tests"
+task :test do
+	assembly = "Tests/bin/#{compile_target}/Tests.dll"
+	sh "#{test_runner} #{assembly}"
 end
 
 def generate_dll_arguments dlls
