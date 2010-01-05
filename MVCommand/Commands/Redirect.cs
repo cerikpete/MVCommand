@@ -5,7 +5,7 @@ namespace MVCommand.Commands
     /// <summary>
     /// Class that handles returning the path to redirect to, used as a possible result for commands whose job is just to redirect
     /// </summary>
-    public class Redirect : IRedirect
+    internal class Redirect : IRedirect
     {
         private readonly string _pathToRedirectTo;
 

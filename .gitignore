@@ -8,3 +8,4 @@ Build
 *.resharper.user
 *.sln.cache
 TestResult.xml
+build

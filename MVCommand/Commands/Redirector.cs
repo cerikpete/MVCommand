@@ -20,5 +20,10 @@ namespace MVCommand.Commands
             var redirect = new Redirect(path.VirtualPath);
             return redirect;
         }
+
+        public static IRedirect Redirect(string pathToRedirectTo)
+        {
+            return new Redirect(pathToRedirectTo);
+        }
     }
 }
