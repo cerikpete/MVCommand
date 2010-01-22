@@ -110,7 +110,11 @@ namespace MVCommand.Controllers
             }
             else if (Request.Headers["X-Requested-With"] != null && Request.Headers["X-Requested-With"].Contains("XMLHttpRequest"))
             {
-                nameOfActionToInvoke = "ContentAction";
+                // Accepting "text\html" indicates we don't want to use a ContentActoion
+                if (!Request.Headers["Accept"].Contains("text/html"))
+                {
+                    nameOfActionToInvoke = "ContentAction";
+                }
             }
             ActionInvoker.InvokeAction(ControllerContext, nameOfActionToInvoke);
         }
