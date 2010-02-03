@@ -1,4 +1,5 @@
 using System;
+using System.Web;
 using System.Web.Routing;
 
 namespace MVCommand.Commands
@@ -15,6 +16,11 @@ namespace MVCommand.Commands
 
         public static string GetUrlFor(string context, string @event, object additionalRouteData)
         {
+            if (HttpContext.Current == null)
+            {
+                return string.Empty;
+            }
+
             var routeData = new RouteValueDictionary { { "context", context }, { "event", @event } };
             if (additionalRouteData != null)
             {
