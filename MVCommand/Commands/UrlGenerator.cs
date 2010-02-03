@@ -10,15 +10,19 @@ namespace MVCommand.Commands
     {
         public static string GetUrlFor(string context, string @event)
         {
-            var routeData = new RouteValueDictionary { { "context", context }, { "event", @event } };
-            return GetUrlFor(context, @event, routeData);
+            return GetUrlFor(context, @event, null);
         }
 
         public static string GetUrlFor(string context, string @event, object additionalRouteData)
         {
-            var routeData = additionalRouteData as RouteValueDictionary;
-            routeData.Add("context", context);
-            routeData.Add("event", @event);
+            var routeData = new RouteValueDictionary { { "context", context }, { "event", @event } };
+            if (additionalRouteData != null)
+            {
+                foreach (var value in PropertyRetriever.GetProperties(additionalRouteData))
+                {
+                    routeData.Add(value.Name, value.Value);
+                }
+            }
 
             var path = RouteTable.Routes.GetVirtualPath(null, routeData);
             if (path == null)

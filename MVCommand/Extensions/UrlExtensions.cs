@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Web.Mvc;
 using System.Web.Routing;
 using MVCommand.Commands;
@@ -40,27 +38,14 @@ namespace MVCommand.Extensions
 
             if (routeData != null)
             {
-                foreach (var value in GetProperties(routeData))
+                foreach (var value in PropertyRetriever.GetProperties(routeData))
                 {
                     routeValues.Add(value.Name, value.Value);
                 }
             }
 
             return helper.Action(null, null, routeValues);
-        }
-
-        private static IEnumerable<PropertyValue> GetProperties(object routeData)
-        {
-            PropertyDescriptorCollection props = TypeDescriptor.GetProperties(routeData);
-            foreach (PropertyDescriptor prop in props)
-            {
-                object val = prop.GetValue(routeData);
-                if (val != null)
-                {
-                    yield return new PropertyValue { Name = prop.Name, Value = val };
-                }
-            }
-        }
+        }        
     }
 
     class ActionContext
@@ -81,11 +66,5 @@ namespace MVCommand.Extensions
         {
             get { return _namespaceValues[_namespaceValues.Length - 1]; }
         }
-    }
-
-    class PropertyValue
-    {
-        public string Name { get; set; }
-        public object Value { get; set; }
-    }
+    }    
 }
