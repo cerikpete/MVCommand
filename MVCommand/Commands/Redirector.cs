@@ -1,6 +1,3 @@
-using System;
-using System.Web.Routing;
-
 namespace MVCommand.Commands
 {
     /// <summary>
@@ -10,14 +7,8 @@ namespace MVCommand.Commands
     public static class Redirector
     {
         public static IRedirect Redirect(string context, string @event)
-        {
-            var routeData = new RouteValueDictionary { { "context", context }, { "event", @event } };
-            var path = RouteTable.Routes.GetVirtualPath(null, routeData);
-            if (path == null)
-            {
-                throw new InvalidOperationException(string.Format("Matching route can't be found for context \"{0}\" and event \"{1}\"", context, @event));
-            }
-            var redirect = new Redirect(path.VirtualPath);
+        {            
+            var redirect = new Redirect(UrlGenerator.GetUrlFor(context, @event));
             return redirect;
         }
 

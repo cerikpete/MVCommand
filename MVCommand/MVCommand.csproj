@@ -73,6 +73,7 @@
     <Compile Include="Commands\IRedirect.cs" />
     <Compile Include="Commands\Redirect.cs" />
     <Compile Include="Commands\Redirector.cs" />
+    <Compile Include="Commands\UrlGenerator.cs" />
     <Compile Include="Controllers\CommandController.cs" />
     <Compile Include="Controllers\CommandControllerFactory.cs" />
     <Compile Include="Extensions\HtmlExtensions.cs" />
