@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using Microsoft.Practices.ServiceLocation;
 using MVCommand.Commands;
+using MVCommand.Logging;
 using MVCommand.Validation;
 
 namespace MVCommand.Controllers
@@ -188,8 +189,9 @@ namespace MVCommand.Controllers
                     }
                 }
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                Log<CommandController>.Error("Error attempting to execute command", ex);
                 throw new ArgumentException(string.Format("The type: {0} has already been added to the ViewData collection", result.GetType().Name));
             }
             finally
