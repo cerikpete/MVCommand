@@ -34,7 +34,7 @@ namespace MVCommand.Controllers
 
         public JsonResult JsonAction()
         {
-            return Json(result);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         public ContentResult ContentAction()
@@ -244,12 +244,17 @@ namespace MVCommand.Controllers
 
         private void BindModel(IModelBinder modelBinder, Type modelType, object model)
         {
-            ModelBindingContext modelBindingContext = new ModelBindingContext();
-            modelBindingContext.Model = model;
-            modelBindingContext.ModelState = ModelState;
-            modelBindingContext.ModelType = modelType;
-            modelBindingContext.ValueProvider = ValueProvider;
-            modelBinder.BindModel(ControllerContext, modelBindingContext);
+            IModelBinder binder = Binders.GetBinder(modelType);
+
+            ModelBindingContext bindingContext = new ModelBindingContext()
+            {
+                ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, modelType),
+                ModelName = null,
+                ModelState = ModelState,
+                PropertyFilter = null,
+                ValueProvider = ValueProvider
+            };
+            binder.BindModel(ControllerContext, bindingContext);
         }
 
         private string Context
