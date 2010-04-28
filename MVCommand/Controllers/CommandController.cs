@@ -115,7 +115,7 @@ namespace MVCommand.Controllers
             }
             else if (Request.Headers["X-Requested-With"] != null && Request.Headers["X-Requested-With"].Contains("XMLHttpRequest"))
             {
-                // Accepting "text\html" indicates we don't want to use a ContentActoion
+                // Accepting "text\html" indicates we don't want to use a ContentAction
                 if (!Request.Headers["Accept"].Contains("text/html"))
                 {
                     nameOfActionToInvoke = "ContentAction";
@@ -220,7 +220,12 @@ namespace MVCommand.Controllers
 
         private void LoadObjectToTempData(string key, object objectToLoad)
         {
-            TempData.Add(key, objectToLoad);
+            // This is an implementation of TempData.Add which for some reason does not persist the TempData
+            // between requests
+            //IDictionary<string, object> dictionary = ControllerContext.HttpContext.Session["__ControllerTempData"] as IDictionary<string, object> ?? new Dictionary<string, object>();
+            //dictionary.Add(key, objectToLoad);
+            //ControllerContext.HttpContext.Session["__ControllerTempData"] = dictionary;
+            TempData[key] = objectToLoad;
         }
 
         private void LoadErrorDataToTempDataAndRedirect()
