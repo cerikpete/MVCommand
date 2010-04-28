@@ -56,11 +56,13 @@ namespace MVCommand.Controllers
 
             if (CommandDictionary != null && CommandDictionary.ContainsKey(ContextActionKey))
             {
+                Log<CommandController>.Debug("Firing commands found in the dictionary for key: " + ContextActionKey);
                 ExecuteCommandsInDictionary();
             }
             else
             {
                 // Get all commands in specific assembly and execute them
+                Log<CommandController>.Debug("Firing commands in namespace: " + ContextActionKey);
                 ExecuteCommandsInSpecifiedNamespace();
             }     
 
@@ -80,6 +82,7 @@ namespace MVCommand.Controllers
             {
                 // Load error messages to ViewData, as well as Dictionary of objects to be loaded to the view so any data entered before
                 // the error is saved
+                Log<CommandController>.Debug("Loading error data to the ViewData dictionary");
                 LoadErrorDataToViewDataDictionary(errorType);
             }
 
@@ -88,6 +91,7 @@ namespace MVCommand.Controllers
             if (successHasOccurred)
             {
                 // Load the success message to view data
+                Log<CommandController>.Debug("Loading success data to the ViewData dictionary");
                 ViewData.Add(successType, TempData[successType]);
             }
         }
@@ -169,12 +173,14 @@ namespace MVCommand.Controllers
                 {
                     if (typeof(IError).IsAssignableFrom(result.GetType()))
                     {
+                        Log<CommandController>.Debug("Adding an error to the TempData collection");
                         LoadErrorDataToTempDataAndRedirect();
                     }
                     else
                     {
                         if (typeof(ISuccess).IsAssignableFrom(result.GetType()))
                         {
+                            Log<CommandController>.Debug("Adding a success message to the TempData collection");
                             LoadObjectToTempData(typeof(ISuccess).FullName, result);
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
@@ -214,11 +220,7 @@ namespace MVCommand.Controllers
 
         private void LoadObjectToTempData(string key, object objectToLoad)
         {
-            // This is an implementation of TempData.Add which for some reason does not persist the TempData
-            // between requests
-            IDictionary<string, object> dictionary = ControllerContext.HttpContext.Session["__ControllerTempData"] as IDictionary<string, object> ?? new Dictionary<string, object>();
-            dictionary.Add(key, objectToLoad);
-            ControllerContext.HttpContext.Session["__ControllerTempData"] = dictionary;
+            TempData.Add(key, objectToLoad);
         }
 
         private void LoadErrorDataToTempDataAndRedirect()
@@ -233,7 +235,7 @@ namespace MVCommand.Controllers
         {
             var modelType = commandObject.GetType().BaseType.GetGenericArguments()[0].UnderlyingSystemType;
             var model = Activator.CreateInstance(modelType);
-            BindModel(new DefaultModelBinder(), modelType, model);
+            BindModel(modelType, model);
 
             // Set model property on bindable command object
             Type fullType = BindableCommandType.MakeGenericType(model.GetType());
@@ -242,7 +244,7 @@ namespace MVCommand.Controllers
             propertyInfo.SetValue(commandObject, model, null);
         }
 
-        private void BindModel(IModelBinder modelBinder, Type modelType, object model)
+        private void BindModel(Type modelType, object model)
         {
             IModelBinder binder = Binders.GetBinder(modelType);
 
