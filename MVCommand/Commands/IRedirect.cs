@@ -1,7 +1,9 @@
+using System.Web.Mvc;
+
 namespace MVCommand.Commands
 {
     public interface IRedirect
     {
-        void HandleRedirect();
+        void HandleRedirect(ControllerContext controllerContext);
     }
 }

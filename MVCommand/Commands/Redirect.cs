@@ -1,4 +1,4 @@
-using System.Web;
+using System.Web.Mvc;
 
 namespace MVCommand.Commands
 {
@@ -14,9 +14,9 @@ namespace MVCommand.Commands
             _pathToRedirectTo = pathToRedirectTo;
         }
 
-        public void HandleRedirect()
+        public void HandleRedirect(ControllerContext controllerContext)
         {
-            HttpContext.Current.Response.Redirect(_pathToRedirectTo);
+            controllerContext.HttpContext.Response.Redirect(_pathToRedirectTo);
         }
     }
 }

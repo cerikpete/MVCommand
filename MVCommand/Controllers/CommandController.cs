@@ -186,7 +186,7 @@ namespace MVCommand.Controllers
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
                         {
                             var redirect = result as IRedirect;
-                            redirect.HandleRedirect();
+                            redirect.HandleRedirect(ControllerContext);
                         }
                         else
                         {
@@ -220,12 +220,7 @@ namespace MVCommand.Controllers
 
         private void LoadObjectToTempData(string key, object objectToLoad)
         {
-            // This is an implementation of TempData.Add which for some reason does not persist the TempData
-            // between requests
-            //IDictionary<string, object> dictionary = ControllerContext.HttpContext.Session["__ControllerTempData"] as IDictionary<string, object> ?? new Dictionary<string, object>();
-            //dictionary.Add(key, objectToLoad);
-            //ControllerContext.HttpContext.Session["__ControllerTempData"] = dictionary;
-            TempData[key] = objectToLoad;
+            TempData.Add(key, objectToLoad);
         }
 
         private void LoadErrorDataToTempDataAndRedirect()
