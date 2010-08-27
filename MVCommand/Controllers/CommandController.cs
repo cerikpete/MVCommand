@@ -192,6 +192,12 @@ namespace MVCommand.Controllers
                         {
                             Log<CommandController>.Debug("Adding a success message to the TempData collection");
                             LoadObjectToTempData(typeof(ISuccess).FullName, result);
+
+                            var success = result as ISuccess;
+                            if (!string.IsNullOrEmpty(success.RedirectUrl))
+                            {
+                                redirectPath = success.RedirectUrl;
+                            }
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
                         {
