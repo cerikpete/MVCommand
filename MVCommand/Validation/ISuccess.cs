@@ -9,10 +9,5 @@ namespace MVCommand.Validation
         /// A success message to return to the view
         /// </summary>
         string Message { get; set; }
-        
-        /// <summary>
-        /// Optional URL to redirect to after the request is complete
-        /// </summary>
-        string RedirectUrl { get; set; }
     }
 }
