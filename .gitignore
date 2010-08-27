@@ -5,7 +5,7 @@ obj
 _ReSharper.*
 Build
 *.resharper
-*.resharper.user
+*.[Rr]e[Ss]harper.user
 *.sln.cache
 TestResult.xml
 build
