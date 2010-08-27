@@ -12,6 +12,7 @@ namespace MVCommand.Controllers
     {
         public const string NamespaceFormat = "{0}.{1}";
         private object result;
+        private string redirectPath;
 
         /// <summary>
         /// This override allows us to point to the correct view, which lives under the folder with the same name
@@ -40,6 +41,11 @@ namespace MVCommand.Controllers
         public ContentResult ContentAction()
         {
             return Content(result.ToString());
+        }
+
+        public RedirectResult RedirectAction()
+        {
+            return Redirect(redirectPath);
         }
 
         public IDictionary<string, IEnumerable<Type>> CommandDictionary { get; set; }
@@ -109,7 +115,11 @@ namespace MVCommand.Controllers
         private void InvokeAppropriateControllerAction()
         {
             string nameOfActionToInvoke = "DefaultAction";
-            if (Request.Headers["Accept"].Contains("json"))
+            if (!string.IsNullOrEmpty(redirectPath))
+            {
+                nameOfActionToInvoke = "RedirectAction";
+            }
+            else if (Request.Headers["Accept"].Contains("json"))
             {
                 nameOfActionToInvoke = "JsonAction";
             }
@@ -192,7 +202,7 @@ namespace MVCommand.Controllers
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
                         {
                             var redirect = result as IRedirect;
-                            redirect.HandleRedirect(ControllerContext);
+                            redirectPath = redirect.PathToRedirectTo;
                         }
                         else
                         {
