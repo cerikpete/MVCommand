@@ -1,7 +1,9 @@
+using System.Web.Mvc;
+
 namespace MVCommand.Commands
 {
     public interface IRedirect
     {
-        string PathToRedirectTo { get; }
+        void HandleRedirect(ControllerContext controllerContext);
     }
 }
