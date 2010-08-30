@@ -176,11 +176,10 @@ namespace MVCommand.Controllers
                         if (typeof(ISuccess).IsAssignableFrom(result.GetType()))
                         {
                             LoadObjectToTempData(typeof(ISuccess).FullName, result);
-
-                            var success = result as ISuccess;
-                            if (!string.IsNullOrEmpty(success.RedirectUrl))
+                            var successResult = result as ISuccess;
+                            if (!string.IsNullOrEmpty(successResult.RedirectUrl))
                             {
-                                redirectPath = success.RedirectUrl;
+                                Response.Redirect(successResult.RedirectUrl);
                             }
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))

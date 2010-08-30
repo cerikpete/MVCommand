@@ -11,7 +11,7 @@ namespace MVCommand.Validation
         string Message { get; set; }
         
         /// <summary>
-        /// Optional URL to redirect to after the request is complete
+        /// The optional url to redirect to once the command is complete
         /// </summary>
         string RedirectUrl { get; set; }
     }
