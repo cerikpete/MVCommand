@@ -56,24 +56,31 @@ namespace MVCommand.Controllers
         /// </summary>
         protected override void ExecuteCore()
         {
-            TempData.Load(ControllerContext, TempDataProvider);
-
-            LoadSuccessOrErrorDataToViewDataIfApplicable();
-
-            if (CommandDictionary != null && CommandDictionary.ContainsKey(ContextActionKey))
+            try
             {
-                Log<CommandController>.Debug("Firing commands found in the dictionary for key: " + ContextActionKey);
-                ExecuteCommandsInDictionary();
+                TempData.Load(ControllerContext, TempDataProvider);
+
+                LoadSuccessOrErrorDataToViewDataIfApplicable();
+
+                if (CommandDictionary != null && CommandDictionary.ContainsKey(ContextActionKey))
+                {
+                    Log<CommandController>.Debug("Firing commands found in the dictionary for key: " + ContextActionKey);
+                    ExecuteCommandsInDictionary();
+                }
+                else
+                {
+                    // Get all commands in specific assembly and execute them
+                    Log<CommandController>.Debug("Firing commands in namespace: " + ContextActionKey);
+                    ExecuteCommandsInSpecifiedNamespace();
+                }
+
+                InvokeAppropriateControllerAction();
+                TempData.Save(ControllerContext, TempDataProvider);
             }
-            else
+            catch(Exception e)
             {
-                // Get all commands in specific assembly and execute them
-                Log<CommandController>.Debug("Firing commands in namespace: " + ContextActionKey);
-                ExecuteCommandsInSpecifiedNamespace();
-            }     
-
-            InvokeAppropriateControllerAction();
-            TempData.Save(ControllerContext, TempDataProvider);
+                Log<CommandController>.Error("Error occurred in MVCommand", e);
+            }
         }
 
         /// <summary>
@@ -195,7 +202,8 @@ namespace MVCommand.Controllers
                             var successResult = result as ISuccess;
                             if (!string.IsNullOrEmpty(successResult.RedirectUrl))
                             {
-                                Response.Redirect(successResult.RedirectUrl);
+                                Log<CommandController>.Debug("Success result redirecting to " + successResult.RedirectUrl);
+                                redirectPath = successResult.RedirectUrl;
                             }
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
