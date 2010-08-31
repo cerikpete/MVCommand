@@ -25,7 +25,9 @@ namespace MVCommand.Views
                 var typeName = typeof(ISuccess).FullName;
                 if (TempData.ContainsKey(typeName))
                 {
-                    return TempData[typeName] as ISuccess;
+                    var successResult = TempData[typeName] as ISuccess;
+                    Log<ViewResultControl>.Debug("Success info present in ViewData, message: " + successResult.Message);
+                    return successResult;
                 }
                 return null;
             }
