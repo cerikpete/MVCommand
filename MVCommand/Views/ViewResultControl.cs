@@ -1,4 +1,5 @@
 using System.Web.Mvc;
+using MVCommand.Logging;
 using MVCommand.Validation;
 
 namespace MVCommand.Views

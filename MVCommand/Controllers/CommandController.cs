@@ -189,7 +189,8 @@ namespace MVCommand.Controllers
                             if (!string.IsNullOrEmpty(successResult.RedirectUrl))
                             {
                                 Log<CommandController>.Debug("Success result redirecting to " + successResult.RedirectUrl);
-                                redirectPath = successResult.RedirectUrl;
+                                var redirect = new Redirect(successResult.RedirectUrl);
+                                redirect.HandleRedirect();
                             }
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))

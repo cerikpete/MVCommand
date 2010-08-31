@@ -6,7 +6,6 @@ namespace MVCommand.Validation
         /// A success message to return to the view
         /// </summary>
         public string Message { get; set; }
-<<<<<<< HEAD
         
         /// <summary>        
         /// <summary>
