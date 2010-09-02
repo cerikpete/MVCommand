@@ -80,6 +80,7 @@ namespace MVCommand.Controllers
             catch(Exception e)
             {
                 Log<CommandController>.Error("Error occurred in MVCommand", e);
+                throw;
             }
         }
 
@@ -125,6 +126,7 @@ namespace MVCommand.Controllers
             if (!string.IsNullOrEmpty(redirectPath))
             {
                 nameOfActionToInvoke = "RedirectAction";
+                Log<CommandController>.Debug("Will be redirecting to: " + redirectPath);
             }
             else if (Request.Headers["Accept"].Contains("json"))
             {
@@ -251,7 +253,8 @@ namespace MVCommand.Controllers
             LoadObjectToTempData(typeof(IError).FullName, result);
             
             // Redirect to the previous url which is where the error would have occurred
-            Response.Redirect(ControllerContext.HttpContext.Request.UrlReferrer.ToString());
+//            Response.Redirect(ControllerContext.HttpContext.Request.UrlReferrer.ToString());
+            redirectPath = ControllerContext.HttpContext.Request.UrlReferrer.ToString();
         }
 
         private void LoadModelToCommand(ICommand commandObject)
