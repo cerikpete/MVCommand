@@ -15,6 +15,7 @@ namespace MVCommand.Controllers
         private object result;
         private string redirectPath;
         private FileStreamResponse fileStreamResponse;
+        private FileDownloadResponse fileDownloadResponse;
 
         /// <summary>
         /// This override allows us to point to the correct view, which lives under the folder with the same name
@@ -50,9 +51,14 @@ namespace MVCommand.Controllers
             return Redirect(redirectPath);
         }
 
-        public FileResult FileResult()
+        public FileResult FileStreamResult()
         {            
             return File(fileStreamResponse.FileStream, fileStreamResponse.ContentType);
+        }
+
+        public FileResult DownloadFileResult()
+        {
+            return File(fileDownloadResponse.FilePath, fileDownloadResponse.ContentType, fileDownloadResponse.DownloadFileName);
         }
 
         public IDictionary<string, IEnumerable<Type>> CommandDictionary { get; set; }
@@ -132,7 +138,11 @@ namespace MVCommand.Controllers
             string nameOfActionToInvoke = "DefaultAction";
             if (fileStreamResponse != null)
             {
-                nameOfActionToInvoke = "FileResult";
+                nameOfActionToInvoke = "FileStreamResult";
+            }
+            else if (fileDownloadResponse != null)
+            {
+                nameOfActionToInvoke = "DownloadFileResult";
             }
             else if (!string.IsNullOrEmpty(redirectPath))
             {
@@ -228,6 +238,11 @@ namespace MVCommand.Controllers
                         {
                             Log<CommandController>.Debug("FileStreamResponse returned");
                             fileStreamResponse = result as FileStreamResponse;
+                        }
+                        else if (typeof(FileDownloadResponse).IsAssignableFrom(result.GetType()))
+                        {
+                            Log<CommandController>.Debug("FileDownloadResponse returned");
+                            fileDownloadResponse = result as FileDownloadResponse;
                         }
                         else
                         {
