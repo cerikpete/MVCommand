@@ -90,6 +90,7 @@
     <Compile Include="Extensions\UrlExtensions.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Models\DropDownModel.cs" />
+    <Compile Include="Models\FileStreamResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Routing\AuthorizationRouteHandler.cs" />
     <Compile Include="Validation\IError.cs" />

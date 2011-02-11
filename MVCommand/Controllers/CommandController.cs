@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Web.Mvc;
 using Microsoft.Practices.ServiceLocation;
 using MVCommand.Commands;
 using MVCommand.Logging;
+using MVCommand.Models;
 using MVCommand.Validation;
 
 namespace MVCommand.Controllers
@@ -13,6 +15,7 @@ namespace MVCommand.Controllers
         public const string NamespaceFormat = "{0}.{1}";
         private object result;
         private string redirectPath;
+        private FileStreamResponse fileStreamResponse;
 
         /// <summary>
         /// This override allows us to point to the correct view, which lives under the folder with the same name
@@ -46,6 +49,11 @@ namespace MVCommand.Controllers
         public RedirectResult RedirectAction()
         {
             return Redirect(redirectPath);
+        }
+
+        public FileResult FileResult()
+        {            
+            return File(fileStreamResponse.FileStream, fileStreamResponse.ContentType);
         }
 
         public IDictionary<string, IEnumerable<Type>> CommandDictionary { get; set; }
@@ -123,7 +131,11 @@ namespace MVCommand.Controllers
         private void InvokeAppropriateControllerAction()
         {
             string nameOfActionToInvoke = "DefaultAction";
-            if (!string.IsNullOrEmpty(redirectPath))
+            if (fileStreamResponse != null)
+            {
+                nameOfActionToInvoke = "FileResult";
+            }
+            else if (!string.IsNullOrEmpty(redirectPath))
             {
                 nameOfActionToInvoke = "RedirectAction";
                 Log<CommandController>.Debug("Will be redirecting to: " + redirectPath);
@@ -213,6 +225,11 @@ namespace MVCommand.Controllers
                             var redirect = result as IRedirect;
                             redirectPath = redirect.PathToRedirectTo;
                         }
+                        else if (typeof(FileStreamResponse).IsAssignableFrom(result.GetType()))
+                        {
+                            Log<CommandController>.Debug("FileStreamResponse returned");
+                            fileStreamResponse = result as FileStreamResponse;
+                        }
                         else
                         {
                             ViewData.Add(result.GetType().FullName, result);
@@ -253,7 +270,6 @@ namespace MVCommand.Controllers
             LoadObjectToTempData(typeof(IError).FullName, result);
             
             // Redirect to the previous url which is where the error would have occurred
-//            Response.Redirect(ControllerContext.HttpContext.Request.UrlReferrer.ToString());
             redirectPath = ControllerContext.HttpContext.Request.UrlReferrer.ToString();
         }
 
