@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 
@@ -12,16 +13,28 @@ namespace MVCommand.Views.ViewEngine
         {
             var context = controllerContext.RouteData.GetRequiredString("context");
 
-            // Insert current context as a possible location to retrieve a partial view from
-            var partialLocationForContextFormat = "~/Views/" + context + "/{0}.ascx";
+            // Insert current context as a possible location to retrieve a partial view from            
             var currentFormats = PartialViewLocationFormats.ToList();
-            if (!currentFormats.Contains(partialLocationForContextFormat))
+            foreach (var format in FormatsForPossiblePartials(context))
             {
-                currentFormats.Add(partialLocationForContextFormat);
+                if (!currentFormats.Contains(format))
+                {
+                    currentFormats.Add(format);
+                }
             }
+            
             PartialViewLocationFormats = currentFormats.ToArray();
 
             return base.FindPartialView(controllerContext, partialViewName, useCache);
+        }
+
+        private IEnumerable<string> FormatsForPossiblePartials(string context)
+        {
+            var possibleExtensions = new List<string> {"ascx", "cshtml"};
+            foreach (var extension in possibleExtensions)
+            {
+                yield return string.Format("~/Views/" + context + "/{0}.{1}", extension);
+            }
         }
     }
 }
