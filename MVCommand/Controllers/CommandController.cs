@@ -4,6 +4,7 @@ using System.Web.Mvc;
 using Microsoft.Practices.ServiceLocation;
 using MVCommand.Commands;
 using MVCommand.Logging;
+using MVCommand.Models;
 using MVCommand.Validation;
 
 namespace MVCommand.Controllers
@@ -12,6 +13,9 @@ namespace MVCommand.Controllers
     {
         public const string NamespaceFormat = "{0}.{1}";
         private object result;
+        private string redirectPath;
+        private FileStreamResponse fileStreamResponse;
+        private FileDownloadResponse fileDownloadResponse;
 
         /// <summary>
         /// This override allows us to point to the correct view, which lives under the folder with the same name
@@ -34,12 +38,27 @@ namespace MVCommand.Controllers
 
         public JsonResult JsonAction()
         {
-            return Json(result);
+            return Json(result, JsonRequestBehavior.AllowGet);
         }
 
         public ContentResult ContentAction()
         {
             return Content(result.ToString());
+        }
+
+        public RedirectResult RedirectAction()
+        {
+            return Redirect(redirectPath);
+        }
+
+        public FileResult FileStreamResult()
+        {            
+            return File(fileStreamResponse.FileStream, fileStreamResponse.ContentType);
+        }
+
+        public FileResult DownloadFileResult()
+        {
+            return File(fileDownloadResponse.FilePath, fileDownloadResponse.ContentType, fileDownloadResponse.DownloadFileName);
         }
 
         public IDictionary<string, IEnumerable<Type>> CommandDictionary { get; set; }
@@ -74,6 +93,7 @@ namespace MVCommand.Controllers
             catch(Exception e)
             {
                 Log<CommandController>.Error("Error occurred in MVCommand", e);
+                throw;
             }
         }
 
@@ -89,6 +109,7 @@ namespace MVCommand.Controllers
             {
                 // Load error messages to ViewData, as well as Dictionary of objects to be loaded to the view so any data entered before
                 // the error is saved
+                Log<CommandController>.Debug("Loading error data to the ViewData dictionary");
                 LoadErrorDataToViewDataDictionary(errorType);
             }
 
@@ -97,6 +118,7 @@ namespace MVCommand.Controllers
             if (successHasOccurred)
             {
                 // Load the success message to view data
+                Log<CommandController>.Debug("Loading success data to the ViewData dictionary");
                 ViewData.Add(successType, TempData[successType]);
             }
         }
@@ -114,13 +136,26 @@ namespace MVCommand.Controllers
         private void InvokeAppropriateControllerAction()
         {
             string nameOfActionToInvoke = "DefaultAction";
-            if (Request.Headers["Accept"].Contains("json"))
+            if (fileStreamResponse != null)
+            {
+                nameOfActionToInvoke = "FileStreamResult";
+            }
+            else if (fileDownloadResponse != null)
+            {
+                nameOfActionToInvoke = "DownloadFileResult";
+            }
+            else if (!string.IsNullOrEmpty(redirectPath))
+            {
+                nameOfActionToInvoke = "RedirectAction";
+                Log<CommandController>.Debug("Will be redirecting to: " + redirectPath);
+            }
+            else if (Request.Headers["Accept"].Contains("json"))
             {
                 nameOfActionToInvoke = "JsonAction";
             }
             else if (Request.Headers["X-Requested-With"] != null && Request.Headers["X-Requested-With"].Contains("XMLHttpRequest"))
             {
-                // Accepting "text\html" indicates we don't want to use a ContentActoion
+                // Accepting "text\html" indicates we don't want to use a ContentAction
                 if (!Request.Headers["Accept"].Contains("text/html"))
                 {
                     nameOfActionToInvoke = "ContentAction";
@@ -178,25 +213,36 @@ namespace MVCommand.Controllers
                 {
                     if (typeof(IError).IsAssignableFrom(result.GetType()))
                     {
+                        Log<CommandController>.Debug("Adding an error to the TempData collection");
                         LoadErrorDataToTempDataAndRedirect();
                     }
                     else
                     {
                         if (typeof(ISuccess).IsAssignableFrom(result.GetType()))
                         {
+                            Log<CommandController>.Debug("Adding a success message to the TempData collection");
                             LoadObjectToTempData(typeof(ISuccess).FullName, result);
                             var successResult = result as ISuccess;
                             if (!string.IsNullOrEmpty(successResult.RedirectUrl))
                             {
-                                Log<CommandController>.Debug("Success result redirecting to " + successResult.RedirectUrl);
-                                var redirect = new Redirect(successResult.RedirectUrl);
-                                redirect.HandleRedirect();
+                                Log<CommandController>.Debug("Success result redirecting to " + successResult.RedirectUrl);                                
+                                redirectPath = successResult.RedirectUrl;
                             }
                         }
                         else if (typeof(IRedirect).IsAssignableFrom(result.GetType()))
                         {
                             var redirect = result as IRedirect;
-                            redirect.HandleRedirect();
+                            redirectPath = redirect.PathToRedirectTo;
+                        }
+                        else if (typeof(FileStreamResponse).IsAssignableFrom(result.GetType()))
+                        {
+                            Log<CommandController>.Debug("FileStreamResponse returned");
+                            fileStreamResponse = result as FileStreamResponse;
+                        }
+                        else if (typeof(FileDownloadResponse).IsAssignableFrom(result.GetType()))
+                        {
+                            Log<CommandController>.Debug("FileDownloadResponse returned");
+                            fileDownloadResponse = result as FileDownloadResponse;
                         }
                         else
                         {
@@ -230,11 +276,7 @@ namespace MVCommand.Controllers
 
         private void LoadObjectToTempData(string key, object objectToLoad)
         {
-            // This is an implementation of TempData.Add which for some reason does not persist the TempData
-            // between requests
-            IDictionary<string, object> dictionary = ControllerContext.HttpContext.Session["__ControllerTempData"] as IDictionary<string, object> ?? new Dictionary<string, object>();
-            dictionary.Add(key, objectToLoad);
-            ControllerContext.HttpContext.Session["__ControllerTempData"] = dictionary;
+            TempData.Add(key, objectToLoad);
         }
 
         private void LoadErrorDataToTempDataAndRedirect()
@@ -242,14 +284,14 @@ namespace MVCommand.Controllers
             LoadObjectToTempData(typeof(IError).FullName, result);
             
             // Redirect to the previous url which is where the error would have occurred
-            Response.Redirect(ControllerContext.HttpContext.Request.UrlReferrer.ToString());
+            redirectPath = ControllerContext.HttpContext.Request.UrlReferrer.ToString();
         }
 
         private void LoadModelToCommand(ICommand commandObject)
         {
             var modelType = commandObject.GetType().BaseType.GetGenericArguments()[0].UnderlyingSystemType;
             var model = Activator.CreateInstance(modelType);
-            BindModel(new DefaultModelBinder(), modelType, model);
+            BindModel(modelType, model);
 
             // Set model property on bindable command object
             Type fullType = BindableCommandType.MakeGenericType(model.GetType());
@@ -258,14 +300,19 @@ namespace MVCommand.Controllers
             propertyInfo.SetValue(commandObject, model, null);
         }
 
-        private void BindModel(IModelBinder modelBinder, Type modelType, object model)
+        private void BindModel(Type modelType, object model)
         {
-            ModelBindingContext modelBindingContext = new ModelBindingContext();
-            modelBindingContext.Model = model;
-            modelBindingContext.ModelState = ModelState;
-            modelBindingContext.ModelType = modelType;
-            modelBindingContext.ValueProvider = ValueProvider;
-            modelBinder.BindModel(ControllerContext, modelBindingContext);
+            IModelBinder binder = Binders.GetBinder(modelType);
+
+            ModelBindingContext bindingContext = new ModelBindingContext()
+            {
+                ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, modelType),
+                ModelName = null,
+                ModelState = ModelState,
+                PropertyFilter = null,
+                ValueProvider = ValueProvider
+            };
+            binder.BindModel(ControllerContext, bindingContext);
         }
 
         private string Context

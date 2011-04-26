@@ -2,6 +2,6 @@ namespace MVCommand.Commands
 {
     public interface IRedirect
     {
-        void HandleRedirect();
+        string PathToRedirectTo { get; }
     }
 }

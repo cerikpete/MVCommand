@@ -13,6 +13,7 @@ namespace MVCommand.Views
                 var typeName = typeof(IError).FullName;
                 if (ViewData.ContainsKey(typeName))
                 {
+                    Log<ViewResultControl>.Debug("Error info present in ViewData");
                     return ViewData[typeName] as IError;
                 }
                 return null;
