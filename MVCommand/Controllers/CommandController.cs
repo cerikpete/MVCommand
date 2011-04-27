@@ -27,8 +27,8 @@ namespace MVCommand.Controllers
             {
                 viewName = Event;
             }
-            string fullViewName = string.Format("~/Views/{0}/{1}.aspx", Context, viewName);
-            return base.View(fullViewName, masterName, viewData);
+            //string fullViewName = string.Format("~/Views/{0}/{1}.aspx", Context, viewName);
+            return base.View(viewName, masterName, viewData);
         }
 
         public ActionResult DefaultAction()
