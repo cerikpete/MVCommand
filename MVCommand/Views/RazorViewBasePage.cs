@@ -4,22 +4,15 @@ namespace MVCommand.Views
 {
     public class RazorViewBasePage<ModelType> : WebViewPage<ModelType> where ModelType : class
     {
-        private IViewDataRetriever<ModelType> _viewDataRetriever;
-
-        protected override void InitializePage()
+        protected override void SetViewData(ViewDataDictionary viewData)
         {
-            _viewDataRetriever = new ViewDataRetriever<ModelType>(ViewData);
-            base.InitializePage();
+            if (viewData == null)
+                return;
+            var viewDataRetriever = new ViewDataRetriever<ModelType>(viewData);
+            viewData.Model = viewDataRetriever.GetModelFromViewData();
+            base.SetViewData(viewData);
         }
 
         public override void Execute() {  }
-
-        public new ModelType Model
-        {
-            get
-            {
-                return _viewDataRetriever.GetModelFromViewData();
-            }
-        }
     }
 }
