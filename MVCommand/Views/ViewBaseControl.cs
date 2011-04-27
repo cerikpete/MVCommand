@@ -2,7 +2,7 @@ using System.Web.Mvc;
 
 namespace MVCommand.Views
 {
-    public class ViewBaseControl<ModelType> : ViewUserControl<ModelType> where ModelType : class
+    public class ViewBaseControl<ModelType> :   ViewUserControl<ModelType> where ModelType : class
     {
         private IViewDataRetriever<ModelType> _viewDataRetriever;
 

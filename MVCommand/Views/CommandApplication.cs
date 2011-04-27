@@ -23,9 +23,9 @@ namespace MVCommand.Views
             RegisterRoutes(RouteTable.Routes);
 
             // Register the command view engine
-            //ViewEngines.Engines.Clear();
+            ViewEngines.Engines.Clear();
             ViewEngines.Engines.Add(new CommandViewEngine());
-            //ViewEngines.Engines.Add(new RazorCommandViewEngine());
+            ViewEngines.Engines.Add(new CommandRazorViewEngine());
 
             // Register the IoC container for MVCommand
             ServiceLocator.SetLocatorProvider(() => ServiceLocatorProvider);

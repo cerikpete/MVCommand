@@ -1,17 +1,18 @@
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
 namespace MVCommand.Views
 {
-    public class ViewBasePage<ModelType> : ViewPage<ModelType> where ModelType : class
+    public class RazorViewBasePage<ModelType> : WebViewPage<ModelType> where ModelType : class
     {
         private IViewDataRetriever<ModelType> _viewDataRetriever;
 
-        protected override void OnInit(System.EventArgs e)
+        protected override void InitializePage()
         {
-            base.OnInit(e);
             _viewDataRetriever = new ViewDataRetriever<ModelType>(ViewData);
+            base.InitializePage();
         }
 
+        public override void Execute() {  }
 
         public new ModelType Model
         {

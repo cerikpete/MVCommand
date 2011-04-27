@@ -51,6 +51,7 @@
       <HintPath>..\lib\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Dictionary\ActionLoader.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Views\NullableModelMVCControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="Views\RazorViewBasePage.cs" />
     <Compile Include="Views\ViewBaseControl.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -93,6 +95,7 @@
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Views\ViewDataRetriever.cs" />
+    <Compile Include="Views\ViewEngine\CommandRazorViewEngine.cs" />
     <Compile Include="Views\ViewEngine\CommandViewEngine.cs" />
     <Compile Include="Views\ViewResultControl.cs">
       <SubType>ASPXCodeBehind</SubType>
