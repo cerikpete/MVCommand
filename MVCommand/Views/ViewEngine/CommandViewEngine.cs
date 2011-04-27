@@ -53,7 +53,7 @@ namespace MVCommand.Views.ViewEngine
         {
             foreach (var extension in possibleExtensions)
             {
-                yield return string.Format("~/Views/" + context + "/{0}.{1}","{0}", extension);
+                yield return "~/Views/" + context + "/{0}." + extension;
             }
         }
     }
