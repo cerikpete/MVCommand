@@ -33,7 +33,7 @@ namespace MVCommand.Views.ViewEngine
             var possibleExtensions = new List<string> {"ascx", "cshtml"};
             foreach (var extension in possibleExtensions)
             {
-                yield return string.Format("~/Views/" + context + "/{0}.{1}", extension);
+                yield return "~/Views/" + context + "/{0}." + extension;
             }
         }
     }
