@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Web.Mvc;
+using MVCommand.Logging;
 
 namespace MVCommand.Views.ViewEngine
 {
@@ -17,9 +18,13 @@ namespace MVCommand.Views.ViewEngine
             var currentFormats = ViewLocationFormats.ToList();
             if (!currentFormats.Contains(partialLocationForContextFormat))
             {
-                currentFormats.Add(partialLocationForContextFormat);
+                currentFormats.Insert(0, partialLocationForContextFormat);
             }
             ViewLocationFormats = currentFormats.ToArray();
+            foreach (var currentFormat in currentFormats)
+            {
+                Log<CommandViewEngine>.Debug("View array format item: " + currentFormat);
+            }
 
             return base.FindView(controllerContext, viewName, masterName, useCache);
         }
@@ -33,9 +38,13 @@ namespace MVCommand.Views.ViewEngine
             var currentFormats = PartialViewLocationFormats.ToList();
             if (!currentFormats.Contains(partialLocationForContextFormat))
             {
-                currentFormats.Add(partialLocationForContextFormat);
+                currentFormats.Insert(0, partialLocationForContextFormat);
             }
             PartialViewLocationFormats = currentFormats.ToArray();
+            foreach (var currentFormat in currentFormats)
+            {
+                Log<CommandViewEngine>.Debug("Partial view array format item: " + currentFormat);
+            }
 
             return base.FindPartialView(controllerContext, partialViewName, useCache);
         }
